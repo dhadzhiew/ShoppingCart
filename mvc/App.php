@@ -9,6 +9,7 @@ class App
     private static $_instance;
     private $_config = null;
     private $_frontController;
+    private $router = null;
 
     private function __construct()
     {
@@ -24,6 +25,17 @@ class App
         }
 
         $this->_frontController = \DH\Mvc\FrontController::getInstance();
+        if($this->router instanceof \DH\Mvc\Routers\IRouter) {
+            $this->_frontController->setRouter($this->router);
+        }
+        elseif ($this->router == 'JsonRPCRouter') {
+            // TODO fix when RPC is done
+            $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
+        } elseif ($this->router == 'CLIRouter') {
+            $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
+        } else {
+            $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
+        }
 
         $this->_frontController->dispatch();
     }
@@ -57,4 +69,16 @@ class App
     {
         return $this->_config;
     }
+
+    public function getRouter()
+    {
+        return $this->router;
+    }
+
+    public function setRouter($router)
+    {
+        $this->router = $router;
+    }
+
+
 }
