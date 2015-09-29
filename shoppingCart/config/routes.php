@@ -1,7 +1,9 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: Hadzhiew
- * Date: 20.9.2015 ã.
- * Time: 19:40
- */
+
+$config['admin']['namespace'] = 'Controllers/Admin1';
+$config['administration']['namespace'] = 'Controllers/Admin';
+$config['administration']['controllers']['index'] = 'test';
+$config['administration']['controllers']['new'] = 'create';
+$config['*']['namespace'] = 'Controllers';
+
+return $config;
