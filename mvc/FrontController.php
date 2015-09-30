@@ -85,8 +85,8 @@ class FrontController
                 $this->controller = strtolower($_routeController['controllers'][$this->controller]['to']);
             }
         }
-        echo $this->controller . '<br/>';
-        echo $this->method . '<br/>';
+//        echo $this->controller . '<br/>';
+//        echo $this->method . '<br/>';
 
         $namespaceClass = $this->namespace . '\\' . ucfirst($this->controller);
         $newController = new $namespaceClass();
