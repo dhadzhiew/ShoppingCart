@@ -71,7 +71,7 @@ class Config
             $_basename = explode('.php', basename($_file))[0];
             $this->_configArray[$_basename] = include $_file;
         } else {
-            throw new \Exception('Canfig file read error: ' . $path);
+            throw new \Exception('Config file read error: ' . $path);
         }
     }
 }
