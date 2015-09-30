@@ -13,9 +13,9 @@ class SimpleDB
 
     public function __construct($connection = null)
     {
-        if($connection instanceof PDO) {
+        if ($connection instanceof PDO) {
             $this->db = $connection;
-        } elseif ($connection != null){
+        } elseif ($connection != null) {
             $this->db = \DH\Mvc\App::getInstance()->getDBConnection($connection);
             $this->connection = $connection;
         } else {
@@ -34,7 +34,7 @@ class SimpleDB
 
     public function execute($params = array())
     {
-        if($params) {
+        if ($params) {
             $this->params = $params;
         }
 

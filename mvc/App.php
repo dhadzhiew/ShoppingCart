@@ -11,20 +11,21 @@ class App
     private $_frontController;
     private $router = null;
     private $_dbConnections;
+    private $_session;
 
     private function __construct()
     {
         \DH\Mvc\Loader::registerNamespace('DH\Mvc', dirname(__FILE__) . DIRECTORY_SEPARATOR);
         \DH\Mvc\Loader::registerAutoLoad();
         $this->_config = \DH\Mvc\Config::getInstance();
-
-        if ($this->_config->getConfigFolder() == null) {
-            $this->_config->setConfigFolder("../config");
-        }
     }
 
     public function run()
     {
+        if ($this->_config->getConfigFolder() == null) {
+            $this->_config->setConfigFolder("../config");
+        }
+
         $this->_frontController = \DH\Mvc\FrontController::getInstance();
         if ($this->router instanceof \DH\Mvc\Routers\IRouter) {
             $this->_frontController->setRouter($this->router);
@@ -35,6 +36,32 @@ class App
             $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
         } else {
             $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
+        }
+
+        $_sessionConfig = $this->_config->app['session'];
+        if ($_sessionConfig['autostart']) {
+            if ($_sessionConfig['type'] == 'native') {
+                $_s = new \DH\Mvc\Session\NativeSession(
+                    $_sessionConfig['name'],
+                    $_sessionConfig['lifetime'],
+                    $_sessionConfig['path'],
+                    $_sessionConfig['domain'],
+                    $_sessionConfig['secure']);
+            } elseif($_sessionConfig['type'] == 'database') {
+                $_s = new \DH\Mvc\Session\DBSession(
+                    $_sessionConfig['dbConnection'],
+                    $_sessionConfig['name'],
+                    $_sessionConfig['dbTable'],
+                    $_sessionConfig['lifetime'],
+                    $_sessionConfig['path'],
+                    $_sessionConfig['domain'],
+                    $_sessionConfig['secure']
+                );
+            } else {
+                throw new \Exception('No valid session.', 500);
+            }
+
+            $this->setSession($_s);
         }
 
         $this->_frontController->dispatch();
@@ -80,17 +107,27 @@ class App
         $this->router = $router;
     }
 
+    public function setSession(\DH\Mvc\Session\ISession $session)
+    {
+        $this->_session = $session;
+    }
+
+    public function getSession()
+    {
+        return $this->_session;
+    }
+
     public function getDBConnection($connection = 'default')
     {
-        if(!$connection) {
+        if (!$connection) {
             throw new \Exception('No connection identifier provided.', 500);
         }
-        if($this->_dbConnections[$connection]) {
+        if ($this->_dbConnections[$connection]) {
             return $this->_dbConnections;
         }
 
         $databaseConfig = $this->getConfig()->database;
-        if(!$databaseConfig[$connection]) {
+        if (!$databaseConfig[$connection]) {
             throw new \Exception('No valid connection identifier provided.', 500);
         }
 
@@ -102,6 +139,13 @@ class App
         $this->_dbConnections[$connection] = $dbh;
 
         return $dbh;
+    }
+
+    public function __destruct()
+    {
+        if($this->_session != null) {
+            $this->_session->saveSession();
+        }
     }
 
 }

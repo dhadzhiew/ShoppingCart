@@ -6,3 +6,6 @@ $app = \DH\Mvc\App::getInstance();
 
 $app->run();
 
+$app->getSession()->counter += 1;
+
+echo $app->getSession()->counter;
