@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><?= $this->getTitle(); ?></title>
-    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>
+    <title><?= self::title(); ?></title>
+<!--    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>-->
     <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
@@ -13,8 +13,13 @@
                 <ul>
                     <li><a href="/">Home</a></li>
                     <li><a href="/">Categories</a></li>
-                    <li><a href="/users/login">Login</a></li>
-                    <li><a href="/users/register">Register</a></li>
+                    <?php if(!self::logged()) { ?>
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/register">Register</a></li>
+                    <?php } else { ?>
+                    <li><a href="/users/profile">Profile</a></li>
+                    <li><a href="/users/logout">Logout</a></li>
+                    <?php } ?>
                 </ul>
             </nav>
         </div>

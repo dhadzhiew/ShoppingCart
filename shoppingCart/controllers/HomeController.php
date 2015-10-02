@@ -4,6 +4,9 @@ namespace Controllers;
 
 class HomeController extends \DH\Mvc\BaseController
 {
+    /**
+     * [Route("nqkyvHome")]
+     */
     public function Index()
     {
 

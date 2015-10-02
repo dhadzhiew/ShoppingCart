@@ -146,7 +146,7 @@ class App
     {
         try {
             $view = \DH\Mvc\View::getInstance();
-            $view->setTitle('Error ' . $errorCode);
+            View::title('Error ' . $errorCode);
             $view->appendToLayout('header', 'header');
             $view->appendToLayout('body', 'errors.' . $errorCode);
             $view->appendToLayout('footer', 'footer');

@@ -1,7 +1,7 @@
 <?php
 $config['default_controller'] = 'Home';
 $config['default_method'] = 'Index';
-$config['namespaces']['Controllers'] = 'D:\Programs\xampp\htdocs\PHP Web Development\IndividualProject\trunk\shoppingCart\controllers';
+$config['namespaces']['Controllers'] = 'C:\Users\Hadzhiew\Dropbox\IndividualProject\trunk\shoppingCart\controllers';
 
 $config['session']['autostart'] = true;
 $config['session']['type'] = 'native';

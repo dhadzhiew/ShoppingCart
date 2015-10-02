@@ -89,7 +89,7 @@ input[type='submit']:hover {
     text-align: center;
 }
 .errors {
-    background: rgba(203, 38, 46, 0.55);
+    background: rgba(231, 14, 4, 0.55);
     width: 300px;
     margin: 15px auto;
     padding: 10px;
@@ -99,7 +99,7 @@ input[type='submit']:hover {
 }
 .errors p {
     margin: 3px 0;
-    color: #333;
+    color: #fff;
 }
 .success {
     background: rgba(47, 203, 78, 0.55);

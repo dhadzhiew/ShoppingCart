@@ -1,7 +1,6 @@
 <?php
-
-
-//$config['administration']['controllers']['inasdasddex']['to'] = 'test';
 $config['*']['namespace'] = 'Controllers';
+
+include 'customRoutes.php';
 
 return $config;

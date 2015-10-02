@@ -5,49 +5,102 @@ use DH\Mvc\BaseController;
 use DH\Mvc\Validation;
 use DH\Mvc\View;
 use DH\ShoppingCart\Models\UserModel;
+use DH\ShoppingCart\Models\ViewModels\User\LoginUserViewModel;
+use DH\ShoppingCart\Models\ViewModels\User\ProfileUserViewModel;
 use DH\ShoppingCart\Models\ViewModels\User\RegisterUserViewModel;
 
+/**
+ * [RoutePrefix("useri/")]
+ */
 class UsersController extends BaseController
 {
+    /**
+     * [Route("kon")]
+     */
     public function register()
     {
+        if($this->session->userId != null) {
+            $this->redirect('/users/profile');
+        }
+
         $userViewModel = new RegisterUserViewModel();
-        if($this->input->post('submit')) {
+        if ($this->input->post('submit')) {
             $username = $this->input->post('username', 'trim');
             $email = $this->input->post('email', 'trim');
             $pass = $this->input->post('pass', 'trim');
             $passAgain = $this->input->post('passAgain', 'trim');
 
-            if(Validation::matches($pass, $passAgain)) {
-                $userModel = new UserModel();
-                $result = $userModel->register($username, $email, $pass);
-                $userViewModel->errors = array_merge($result, $userViewModel->errors);
-            } else {
-                $userViewModel->errors[] = 'Passwords do not matches.';
-            }
-            
-            if(!count($userViewModel->errors)) {
+            $userModel = new UserModel();
+            $userViewModel->errors = $userModel->register($username, $email, $pass, $passAgain);
+
+            if (!count($userViewModel->errors)) {
                 $userViewModel->success = true;
             }
         }
+
         $view = View::getInstance();
-        $view->setTitle('Register');
+        View::title('Register');
         $view->appendToLayout('header', 'header');
         $view->appendToLayout('body', 'user.register');
         $view->appendToLayout('footer', 'footer');
         $view->display('layouts.default', $userViewModel);
     }
-
+    /**
+     * [Route("login")]
+     */
     public function login()
     {
-//        $userModel = new \DH\ShoppingCart\Models\UserModel();
+        if($this->session->userId != null) {
+            $this->redirect('/users/profile');
+        }
 
+        $viewModel = new LoginUserViewModel();
+        if ($this->input->post('submit')) {
+            $username = $this->input->post('username', 'trim');
+            $password = $this->input->post('pass', 'trim');
+
+            $userModel = new UserModel();
+            $result = $userModel->login($username, $password);
+
+            if (!$result) {
+                $viewModel->errors[] = 'Invalid password.';
+            } else {
+                $this->session->userId = $result['id'];
+                $this->redirect('/users/profile');
+            }
+
+        }
 
         $view = View::getInstance();
-        $view->setTitle('Login');
+        View::title('Login');
         $view->appendToLayout('header', 'header');
         $view->appendToLayout('body', 'user.login');
         $view->appendToLayout('footer', 'footer');
-        $view->display('layouts.default');
+        $view->display('layouts.default', $viewModel);
+    }
+
+    public function profile()
+    {
+        if($this->session->userId == null) {
+            $this->redirect('/users/login');
+        }
+
+        $userModel = new UserModel();
+        $userInfo = $userModel->getUserInfo($this->session->userId);
+        $viewModel = new ProfileUserViewModel();
+        $viewModel->username = $userInfo['username'];
+
+        $view = View::getInstance();
+        View::title('Profile');
+        $view->appendToLayout('header', 'header');
+        $view->appendToLayout('body', 'user.profile');
+        $view->appendToLayout('footer', 'footer');
+        $view->display('layouts.default', $viewModel);
+    }
+
+    public function logout()
+    {
+        $this->session->destroySession();
+        $this->redirect('/users/login');
     }
 }

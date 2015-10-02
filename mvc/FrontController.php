@@ -60,6 +60,7 @@ class FrontController
         } elseif ($this->namespace == null && !$routes['*']['namespace']) {
             throw new \Exception('Default route missing', 500);
         }
+
         $input = \DH\Mvc\InputData::getInstance();
         $_params = explode('/', $_uri);
         if ($_params[0]) {

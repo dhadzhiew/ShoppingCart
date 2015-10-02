@@ -6,7 +6,7 @@ namespace DH\Mvc;
 class View
 {
     private static $_instance = null;
-    private $title;
+    private static $viewBag;
     private $__viewPath = null;
     private $__viewDir = null;
     private $__extension = '.php';
@@ -30,16 +30,6 @@ class View
 
         return self::$_instance;
     }
-
-//    public function __set($name, $value)
-//    {
-//        $this->__data[$name] = $value;
-//    }
-//
-//    public function  __get($name)
-//    {
-//        return $this->__data[$name];
-//    }
 
     public function setViewDirectory($path)
     {
@@ -170,13 +160,12 @@ class View
         return htmlspecialchars($model);
     }
 
-    public function getTitle()
+    public static function __callStatic($methodName, $args)
     {
-        return $this->title;
-    }
-
-    public function setTitle($title)
-    {
-        $this->title = $title;
+        if(count($args) > 0) {
+            self::$viewBag[$methodName] = $args[0];
+        } else {
+            return self::$viewBag[$methodName];
+        }
     }
 }
