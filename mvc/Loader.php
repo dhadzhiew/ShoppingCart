@@ -34,7 +34,7 @@ final class Loader
             if ($_path && is_dir($_path) && is_readable($_path)) {
                 self::$namespaces[$namespace . '\\'] = $_path . DIRECTORY_SEPARATOR;
             } else {
-                //TODO
+
                 throw new \Exception('Namespace directory read error: ' . $path);
             }
         } else {

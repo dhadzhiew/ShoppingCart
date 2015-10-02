@@ -15,6 +15,7 @@ class App
 
     private function __construct()
     {
+        set_exception_handler(array($this, '_exceptionHandler'));
         \DH\Mvc\Loader::registerNamespace('DH\Mvc', dirname(__FILE__) . DIRECTORY_SEPARATOR);
         \DH\Mvc\Loader::registerAutoLoad();
         $this->_config = \DH\Mvc\Config::getInstance();
@@ -47,7 +48,7 @@ class App
                     $_sessionConfig['path'],
                     $_sessionConfig['domain'],
                     $_sessionConfig['secure']);
-            } elseif($_sessionConfig['type'] == 'database') {
+            } elseif ($_sessionConfig['type'] == 'database') {
                 $_s = new \DH\Mvc\Session\DBSession(
                     $_sessionConfig['dbConnection'],
                     $_sessionConfig['name'],
@@ -141,9 +142,34 @@ class App
         return $dbh;
     }
 
+    public function displayError($errorCode)
+    {
+        try {
+            $view = \DH\Mvc\View::getInstance();
+            $view->setTitle('Error ' . $errorCode);
+            $view->appendToLayout('header', 'header');
+            $view->appendToLayout('body', 'errors.' . $errorCode);
+            $view->appendToLayout('footer', 'footer');
+            $view->display('layouts.default');
+        } catch(\Exception $ex) {
+            $error = \DH\Mvc\Common::headerStatus($errorCode);
+            echo '<h1>' . $error . '</h1>';
+            exit;
+        }
+    }
+
+    public function _exceptionHandler(\Exception $ex)
+    {
+        if ($this->_config && $this->_config->app['displayExceptions'] === true) {
+            echo '<pre>' . print_r($ex, true) . '</pre>';
+        } else {
+            $this->displayError($ex->getCode());
+        }
+    }
+
     public function __destruct()
     {
-        if($this->_session != null) {
+        if ($this->_session != null) {
             $this->_session->saveSession();
         }
     }

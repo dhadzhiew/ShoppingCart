@@ -29,16 +29,28 @@ class InputData
 
     public function hasGet($key)
     {
+        if($this->_get == null) {
+            return null;
+        }
+
         return array_key_exists($key, $this->_get);
     }
 
     public function hasPost($key)
     {
+        if($this->_post == null) {
+            return null;
+        }
+
         return array_key_exists($key, $this->_post);
     }
 
     public function hasCookies($key)
     {
+        if($this->_cookies == null) {
+            return null;
+        }
+
         return array_key_exists($key, $this->_cookies);
     }
 

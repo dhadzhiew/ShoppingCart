@@ -60,14 +60,13 @@ class FrontController
         } elseif ($this->namespace == null && !$routes['*']['namespace']) {
             throw new \Exception('Default route missing', 500);
         }
-
+        $input = \DH\Mvc\InputData::getInstance();
         $_params = explode('/', $_uri);
-
         if ($_params[0]) {
             $this->controller = strtolower(array_shift($_params));
-
             if ($_params[0]) {
                 $this->method = strtolower(array_shift($_params));
+                $input->setGet($_params);
             } else {
                 $this->method = $this->getDefaultMethod();
             }
@@ -85,12 +84,25 @@ class FrontController
                 $this->controller = strtolower($_routeController['controllers'][$this->controller]['to']);
             }
         }
+
+        $input->setPost($this->router->getPost());
 //        echo $this->controller . '<br/>';
 //        echo $this->method . '<br/>';
-
+        $this->controller = $this->controller . 'Controller';
         $namespaceClass = $this->namespace . '\\' . ucfirst($this->controller);
-        $newController = new $namespaceClass();
-        $newController->{$this->method}();
+        $isCallable = false;
+        try {
+            $isCallable = is_callable(array($namespaceClass, $this->method));
+        }catch (\Exception $ex) {
+            throw new \Exception('Not found', 404);
+        }
+
+        if($isCallable){
+            $newController = new $namespaceClass();
+            call_user_func(array($newController, $this->method));
+        }else{
+            throw new \Exception('Not found', 404);
+        }
     }
 
     public function getDefaultController()
