@@ -2,7 +2,9 @@
 
 namespace DH\ShoppingCart\Models\BindingModels\User;
 
-class LoginUser
+use DH\Mvc\BaseBindingModel;
+
+class LoginUser extends BaseBindingModel
 {
     /**
      * [required]

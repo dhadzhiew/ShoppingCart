@@ -16,11 +16,5 @@
 ?>
 
 <div class="register">
-    <form method="post">
-        <input type="text" name="username" placeholder="Username" /><br/>
-        <input type="text" name="email" placeholder="Email" /><br/>
-        <input type="password" name="password" placeholder="Password" /><br/>
-        <input type="password" name="passwordAgain"  placeholder="Password again" /><br/>
-        <input type="submit" name="submit" value="Register" />
-    </form>
+    <?= \DH\Mvc\View::registerForm(); ?>
 </div>

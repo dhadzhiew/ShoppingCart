@@ -15,24 +15,24 @@ class UsersController extends BaseController
      */
     public function register(\DH\ShoppingCart\Models\BindingModels\User\RegisterUser $model = null)
     {
-        if($this->session->userId != null) {
+        if ($this->session->userId != null) {
             $this->redirect('/profile');
         }
-
+        View::registerForm(\DH\ShoppingCart\Forms\RegisterForm::create($model->username, $model->email));
         $userViewModel = new RegisterUser();
-       if($model) {
-           if($model->modelState == true) {
+        if ($model) {
+            if ($model->modelState == true) {
+                View::registerForm(\DH\ShoppingCart\Forms\RegisterForm::create());
+                $userModel = new UserModel();
+                $userViewModel->errors = $userModel->register($model);
 
-           $userModel = new UserModel();
-           $userViewModel->errors = $userModel->register($model);
-
-           if (!count($userViewModel->errors)) {
-               $userViewModel->success = true;
-           }
-           } else {
-               $userViewModel->errors = $model->errors;
-           }
-       }
+                if (!count($userViewModel->errors)) {
+                    $userViewModel->success = true;
+                }
+            } else {
+                $userViewModel->errors = $model->errors;
+            }
+        }
 
         $view = View::getInstance();
         View::title('Register');
@@ -41,18 +41,19 @@ class UsersController extends BaseController
         $view->appendToLayout('footer', 'footer');
         $view->display('layouts.default', $userViewModel);
     }
+
     /**
      * [Route("login")]
      */
     public function login(\DH\ShoppingCart\Models\BindingModels\User\LoginUser $model = null)
     {
-        if($this->session->userId != null) {
+        if ($this->session->userId != null) {
             $this->redirect('/profile');
         }
 
         $viewModel = new \DH\ShoppingCart\Models\ViewModels\User\LoginUser();
         if ($model) {
-            if($model->modelState) {
+            if ($model->modelState) {
                 $username = $model->username;
                 $password = $model->password;
 
@@ -68,11 +69,11 @@ class UsersController extends BaseController
             } else {
                 $viewModel->errors = $model->errors;
             }
-
         }
 
         $view = View::getInstance();
         View::title('Login');
+        View::loginForm(\DH\ShoppingCart\Forms\LoginForm::create($model->username));
         $view->appendToLayout('header', 'header');
         $view->appendToLayout('body', 'user.login');
         $view->appendToLayout('footer', 'footer');
@@ -84,7 +85,7 @@ class UsersController extends BaseController
      */
     public function profile()
     {
-        if($this->session->userId == null) {
+        if ($this->session->userId == null) {
             $this->redirect('/login');
         }
 
@@ -100,6 +101,7 @@ class UsersController extends BaseController
         $view->appendToLayout('footer', 'footer');
         $view->display('layouts.default', $viewModel);
     }
+
     /**
      * [Route("logout")]
      */

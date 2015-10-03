@@ -24,9 +24,12 @@ class BindingModel
     {
         $bindingModelName = array_keys($config)[0];
         $bindingModel = new $bindingModelName();
-        $bindingModel->modelState = true;
 
         foreach ($config[$bindingModelName] as $property => $rules) {
+            if($property == 'modelState' || $property == 'errors') {
+                continue;
+            }
+
             foreach ($rules as $rule) {
                 if (!is_array($rule)) {
                     if (!\DH\Mvc\Validation::$rule($data[$property])) {

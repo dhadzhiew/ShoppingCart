@@ -3,20 +3,22 @@
 namespace DH\ShoppingCart\Models\BindingModels\User;
 
 
-class RegisterUser
+use DH\Mvc\BaseBindingModel;
+
+class RegisterUser extends  BaseBindingModel
 {
     /**
      * [minLength(2)]
      */
     public $username;
     /**
+     * [email]
+     */
+    public $email;
+    /**
      * [minLength(4)]
      * [matches({passwordAgain})]
      */
     public $password;
-    /**
-     * [email]
-     */
-    public $email;
     public $passwordAgain;
 }

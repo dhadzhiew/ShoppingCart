@@ -13,9 +13,5 @@
      }
 ?>
 <div class="login">
-    <form method="post">
-        <input type="text" name="username" placeholder="Username" /><br/>
-        <input type="password" name="password" placeholder="Password" /><br/>
-        <input type="submit" name="submit" value="Login" />
-    </form>
+    <?= \DH\Mvc\View::loginForm() ?>
 </div>
