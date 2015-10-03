@@ -13,26 +13,26 @@ class UsersController extends BaseController
     /**
      * [Route("register")]
      */
-    public function register()
+    public function register(\DH\ShoppingCart\Models\BindingModels\User\RegisterUser $model = null)
     {
         if($this->session->userId != null) {
             $this->redirect('/profile');
         }
 
         $userViewModel = new RegisterUser();
-        if ($this->input->post('submit')) {
-            $username = $this->input->post('username', 'trim');
-            $email = $this->input->post('email', 'trim');
-            $pass = $this->input->post('pass', 'trim');
-            $passAgain = $this->input->post('passAgain', 'trim');
+       if($model) {
+           if($model->modelState == true) {
 
-            $userModel = new UserModel();
-            $userViewModel->errors = $userModel->register($username, $email, $pass, $passAgain);
+           $userModel = new UserModel();
+           $userViewModel->errors = $userModel->register($model);
 
-            if (!count($userViewModel->errors)) {
-                $userViewModel->success = true;
-            }
-        }
+           if (!count($userViewModel->errors)) {
+               $userViewModel->success = true;
+           }
+           } else {
+               $userViewModel->errors = $model->errors;
+           }
+       }
 
         $view = View::getInstance();
         View::title('Register');
@@ -52,7 +52,6 @@ class UsersController extends BaseController
 
         $viewModel = new \DH\ShoppingCart\Models\ViewModels\User\LoginUser();
         if ($model) {
-
             if($model->modelState) {
                 $username = $model->username;
                 $password = $model->password;

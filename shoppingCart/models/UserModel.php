@@ -13,18 +13,17 @@ class UserModel extends SimpleDB
         parent::__construct();
     }
 
-    public function register($username, $email, $password, $passwordAgain)
+    public function register(\DH\ShoppingCart\Models\BindingModels\User\RegisterUser $model)
     {
         $errors = [];
-        $username = Common::normalize($username, 'trim');
-        $email = Common::normalize($email, 'trim');
-        $password = Common::normalize($password, 'trim');
+        $username = Common::normalize($model->username, 'trim');
+        $email = Common::normalize($model->email, 'trim');
+        $password = Common::normalize($model->password, 'trim');
         $validation = new Validation();
         $validation
             ->setRule('minLength', $username, 2, 'Short username')
             ->setRule('email', $email, null, 'Invalid email')
-            ->setRule('minLength', $password, 4, 'Short password')
-            ->setRule('matches', $password, $passwordAgain, 'Passwords do not matches.');
+            ->setRule('minLength', $password, 4, 'Short password');
 
         $validation->validate();
         $errors = $validation->getErrors();

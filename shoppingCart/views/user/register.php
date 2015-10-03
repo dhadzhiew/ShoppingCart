@@ -19,8 +19,8 @@
     <form method="post">
         <input type="text" name="username" placeholder="Username" /><br/>
         <input type="text" name="email" placeholder="Email" /><br/>
-        <input type="password" name="pass" placeholder="Password" /><br/>
-        <input type="password" name="passAgain"  placeholder="Password again" /><br/>
+        <input type="password" name="password" placeholder="Password" /><br/>
+        <input type="password" name="passwordAgain"  placeholder="Password again" /><br/>
         <input type="submit" name="submit" value="Register" />
     </form>
 </div>

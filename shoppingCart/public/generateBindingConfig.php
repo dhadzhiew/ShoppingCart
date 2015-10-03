@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(E_ALL ^ E_NOTICE);
 require_once '../../mvc/Loader.php';
 
 \DH\Mvc\Loader::registerNamespace('DH\Mvc', realpath('../../mvc'));
@@ -48,66 +48,98 @@ function scanControllers($path, &$controllers)
     }
 }
 
-function createCustomRoutes($namespaces)
+function generateBindingRules($controllerStartPath, $configFilePath)
 {
-    scanControllers('..\..', $controllers);
+    scanControllers($controllerStartPath, $controllers);
+    $configVar = '$config';
+    $buffer = '<?php' . PHP_EOL;
+    foreach ($controllers as $controller) {
+        if (!preg_match('/(base|Front)/i', $controller)) {
+            preg_match_all('/(\w+)Controller/', $controller, $resultController);
+            $controllerName = strtolower($resultController[1][0]);
+            preg_match_all('/(\w+)\.php/', $controller, $result);
+            $namespace = getClassNamespace($controller);
+            $className = $namespace . '\\' . $result[1][0];
 
-    $lines = '<?php'.PHP_EOL;
-    foreach($controllers as $controller) {
-        foreach($namespaces as $namespace) {
-            if(!preg_match('/(base|Front)/i', $controller)) {
-                preg_match_all('/(\w+)Controller/', $controller, $resultController);
-                $controllerName=  strtolower($resultController[1][0]);
-                preg_match_all('/(\w+)\.php/', $controller, $result);
-                $className = $result[1][0];
-                $className = $namespace. '\\' . $className;
-
-                if(class_exists($className)) {
+            if (class_exists($className)) {
                     $reflection = new ReflectionClass($className);
                     foreach($reflection->getMethods() as $method) {
-                        $lines .= '$config["'.$namespace.'"]["'.$controllerName.'"]["'.$method->getName().'"]';
                         foreach($method->getParameters() as $param) {
                             $class = $param->getClass();
                             if($class) {
+                                $tempBuffer = $configVar . '["'.$namespace.'"]["'.$controllerName.'"]';
+                                $tempBuffer .= '["'.$method->getName().'"]["'.$class->getName().'"] = [';
                                 foreach($class->getProperties() as $prop) {
-                                    $lines .= '';
-                                    print_r(parseAttribute($prop->getDocComment()));
+                                    $parsedAttributes = parseAttribute($prop->getDocComment());
+                                    $hasAttributes = true;
+                                    if($parsedAttributes) {
+                                        $hasAttributes = true;
+                                        $tempBuffer .= '"' . $prop->getName(). '" => [';
+                                        foreach($parsedAttributes as $attr) {
+                                            if(!$attr['params']) {
+                                                $tempBuffer .= '"'.$attr['method'].'", ';
+                                            }
+                                            else{
+                                                $stringParams = '';
+                                                foreach($attr['params'] as $attrParam) {
+                                                    $stringParams .= '"'.$attrParam.'", ';
+                                                }
+                                                $stringParams = substr($stringParams, 0, strlen($stringParams) - 2);
+                                                $tempBuffer .= '["'.$attr['method'].'", '.$stringParams. '], ';
+                                            }
+                                        }
+                                        $tempBuffer = substr($tempBuffer, 0, strlen($tempBuffer) - 2);
+                                        $tempBuffer .= '], ';
+                                    }else {
+                                        $tempBuffer .= '"'.$prop->getName().'" => [], ';
+                                    }
+
+                                }
+                                if($hasAttributes) {
+                                    $tempBuffer = substr($tempBuffer, 0, strlen($tempBuffer) - 2);
+                                    $tempBuffer .= '];'. PHP_EOL;
+//                                    echo $tempBuffer;
+                                    $buffer .= $tempBuffer;
                                 }
                             }
                         }
                     }
-
-                    break;
-                }
             }
         }
-echo $lines;
-//        file_put_contents('../config/customRoutes.php', $lines);
     }
+    $buffer .= PHP_EOL . 'return ' . $configVar . ';';
+    file_put_contents($configFilePath, $buffer);
+}
+
+generateBindingRules('..\..', '..\config\bindingModels.php');
+function getClassNamespace($file)
+{
+    $content = file_get_contents($file);
+    preg_match_all('/([\r\n])+?namespace +(.+?);/', $content, $result);
+
+    return $result[2][0];
 }
 
 function parseAttribute($doc)
 {
     $isMatched = preg_match_all('/\[(\w+)(\((.+?)\))?\]/', $doc, $result);
-    if(!$isMatched){
+    if (!$isMatched) {
         return false;
     }
 
+    $return = [];
 
+    for ($i = 0; $i < count($result[1]); $i++) {
+        $attr = array(
+            'method' => $result[1][$i],
+        );
+        if ($result[3][$i]) {
+            $params = explode(',', $result[3][$i]);
+            $attr['params'] = $params;
+        }
 
-    $return = array(
-        'method' => $result[1][0],
-    );
-    if($result[3][0]) {
-        $params = explode(',', $result[3][0]);
-        $return['params'] = $params;
+        $return[] = $attr;
     }
 
     return $return;
 }
-
-createCustomRoutes(
-    array(
-        'DH\ShoppingCart\Controllers',
-        'DH\ShoppingCart\Controllers\Admin'
-    ));

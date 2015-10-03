@@ -2,15 +2,21 @@
 
 namespace DH\ShoppingCart\Models\BindingModels\User;
 
-class LoginUser
+
+class RegisterUser
 {
     /**
-     * [required]
      * [minLength(2)]
      */
     public $username;
     /**
-     * [required]
+     * [minLength(4)]
+     * [matches({passwordAgain})]
      */
     public $password;
+    /**
+     * [email]
+     */
+    public $email;
+    public $passwordAgain;
 }
