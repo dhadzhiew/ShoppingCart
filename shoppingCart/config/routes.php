@@ -1,6 +1,7 @@
 <?php
-$config['*']['namespace'] = 'Controllers';
+
+$route['admin'] = ['DH\ShoppingCart\Controllers\Admin'];
 
 include 'customRoutes.php';
 
-return $config;
+return $route;

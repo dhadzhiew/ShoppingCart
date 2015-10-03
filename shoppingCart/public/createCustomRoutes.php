@@ -22,37 +22,50 @@ function scanControllers($path, &$controllers)
     }
 }
 
-function createCustomRoutes($namespace)
+function createCustomRoutes($namespaces)
 {
     scanControllers('..\..', $controllers);
+
     $lines = '<?php'.PHP_EOL;
     foreach($controllers as $controller) {
         require_once $controller;
+        foreach($namespaces as $namespace) {
+            if(!preg_match('/(base|Front)/i', $controller)) {
+                preg_match_all('/(\w+)Controller/', $controller, $resultController);
+                $controllerName=  strtolower($resultController[1][0]);
+                preg_match_all('/(\w+)\.php/', $controller, $result);
+                $className = $result[1][0];
+                $className = $namespace. '\\' . $className;
 
-        if(!preg_match('/(base|Front)/i', $controller)) {
-            preg_match_all('/(\w+)Controller/', $controller, $resultController);
-            $controllerName=  strtolower($resultController[1][0]);
-            preg_match_all('/(\w+)\.php/', $controller, $result);
-            $className = $result[1][0];
-            $className = $namespace. '\\' . $className;
-            $reflection = new ReflectionClass($className);
+                if(class_exists($className)) {
+                    $reflection = new ReflectionClass($className);
 
-            preg_match_all('/\[RoutePrefix\("(.+?)"\)\]/', $reflection->getDocComment(), $routePrefixResult);
-            $routePrefix = $routePrefixResult[1][0];
+                    preg_match_all('/\[RoutePrefix\("(.+?)"\)\]/', $reflection->getDocComment(), $routePrefixResult);
+                    $routePrefix = $routePrefixResult[1][0];
 
-            foreach($reflection->getMethods() as $method) {
-                if(preg_match_all('/\[Route\("(.+?)"\)\]/', $method->getDocComment(), $routeResult)) {
-                    $route = $routePrefix . $routeResult[1][0];
-                    $lines .= '$config["'.$route.'"]["namespace"] = "'.$namespace.'";' . PHP_EOL;
-                    $lines .= '$config["'.$route.'"]["controllers"]["home"]["to"] = "' . $controllerName . '";' . PHP_EOL;
-                    $lines .= '$config["'.$route.'"]["controllers"]["home"]["methods"]["index"] = "' . $method->getName() . '";' . PHP_EOL;
-                    $lines .= PHP_EOL;
+                    if(substr($routePrefix, strlen($routePrefix) - 1) != '/' && strlen($routePrefix) > 0){
+                        $lines .= '$route["'.$routePrefix.'"] = ["'.$namespace.'"];' . PHP_EOL;
+                    }
+
+                    foreach($reflection->getMethods() as $method) {
+                        if(preg_match_all('/\[Route\("(.+?)"\)\]/', $method->getDocComment(), $routeResult)) {
+                            $route = $routePrefix . $routeResult[1][0];
+                            $lines .= '$route["'.$route.'"] = ["'.$namespace.'", "'.$controllerName.'", "'.$method->getName().'"];' . PHP_EOL;
+                        }
+                    }
+
+
+                    break;
                 }
             }
-
-            file_put_contents('../config/customRoutes.php', $lines);
         }
+
+        file_put_contents('../config/customRoutes.php', $lines);
     }
 }
 
-createCustomRoutes('Controllers');
+createCustomRoutes(
+    array(
+        'DH\ShoppingCart\Controllers',
+        'DH\ShoppingCart\Controllers\Admin'
+    ));

@@ -3,6 +3,7 @@
 namespace DH\Mvc;
 
 use DH\Mvc\Routers\IRouter;
+use DH\ShoppingCart\Models\BindingModels\User\LoginUser;
 
 class FrontController
 {
@@ -11,6 +12,10 @@ class FrontController
     private $controller = null;
     private $method = null;
     private $router = null;
+    /**
+     * @var \DH\Mvc\Config
+     */
+    private $config = null;
 
     /**
      * @return \DH\Mvc\Routers\IRouter
@@ -30,7 +35,7 @@ class FrontController
 
     private function __construct()
     {
-
+        $this->config = \DH\Mvc\App::getInstance()->getConfig();
     }
 
     public function dispatch()
@@ -38,78 +43,34 @@ class FrontController
         if($this->router == null) {
             throw new \Exception('No valid router found.', 500);
         }
-        $_uri = $this->router->getURI();
-        $routes = \DH\Mvc\App::getInstance()->getConfig()->routes;
-        $_routeController = null;
-        if (is_array($routes) && count($routes) > 0) {
-            foreach ($routes as $key => $value) {
-                if (stripos($_uri, $key) === 0 && ($_uri == $key || stripos($_uri, $key . '/') === 0) && $value['namespace']) {
-                    $this->namespace = $value['namespace'];
-                    $_uri = substr($_uri, strlen($key) + 1);
-                    $_routeController = $value;
-                    break;
-                }
-            }
-        } else {
-            throw new \Exception('Default route missing.', 500);
-        }
-
-        if ($this->namespace == null && $routes['*']['namespace']) {
-            $this->namespace = $routes['*']['namespace'];
-            $_routeController = $routes['*'];
-        } elseif ($this->namespace == null && !$routes['*']['namespace']) {
-            throw new \Exception('Default route missing', 500);
-        }
-
+        $uri = $this->router->getURI();
         $input = \DH\Mvc\InputData::getInstance();
-        $_params = explode('/', $_uri);
-        if ($_params[0]) {
-            $this->controller = strtolower(array_shift($_params));
-            if ($_params[0]) {
-                $this->method = strtolower(array_shift($_params));
-                $input->setGet($_params);
-            } else {
-                $this->method = $this->getDefaultMethod();
-            }
-        } else {
+
+        if($this->parseCustomRoute($input, $uri)){
+            return;
+        }
+
+        $params = explode('/', $uri);
+        $this->controller = array_shift($params);
+        if(!$this->controller) {
             $this->controller = $this->getDefaultController();
             $this->method = $this->getDefaultMethod();
-        }
-
-        if (is_array($_routeController) && $_routeController['controllers']) {
-            if ($_routeController['controllers'][$this->controller]['methods'][$this->method]) {
-                $this->method = strtolower($_routeController['controllers'][$this->controller]['methods'][$this->method]);
+        } else {
+            $this->method = array_shift($params);
+            if(!$this->method) {
+                $this->method = $this->getDefaultMethod();
             }
-
-            if ($_routeController['controllers'][$this->controller]['to']) {
-                $this->controller = strtolower($_routeController['controllers'][$this->controller]['to']);
-            }
+            $input->setGet($params);
         }
+        $this->namespace = $this->config->app['defaultControllerNamespace'];
 
         $input->setPost($this->router->getPost());
-//        echo $this->controller . '<br/>';
-//        echo $this->method . '<br/>';
-        $this->controller = $this->controller . 'Controller';
-        $namespaceClass = $this->namespace . '\\' . ucfirst($this->controller);
-        $isCallable = false;
-        try {
-            $isCallable = is_callable(array($namespaceClass, $this->method));
-        }catch (\Exception $ex) {
-            throw new \Exception('Not found', 404);
-        }
-
-        if($isCallable){
-            $newController = new $namespaceClass();
-            call_user_func(array($newController, $this->method));
-        }else{
-            throw new \Exception('Not found', 404);
-        }
+        $this->loadControllerAction();
     }
 
     public function getDefaultController()
     {
-        $app = \DH\Mvc\App::getInstance();
-        $controller = $app->getConfig()->app['default_controller'];
+        $controller = $this->config->app['default_controller'];
         if ($controller) {
             return strtolower($controller);
         }
@@ -119,8 +80,7 @@ class FrontController
 
     public function getDefaultMethod()
     {
-        $app = \DH\Mvc\App::getInstance();
-        $method = $app->getConfig()->app['default_method'];
+        $method = $this->config->app['default_method'];
         if ($method) {
             return strtolower($method);
         }
@@ -138,5 +98,90 @@ class FrontController
         }
 
         return self::$_instance;
+    }
+
+    public function loadControllerAction()
+    {
+        $controllerPrefix = $this->controller;
+        $this->controller = $this->controller . 'Controller';
+        $namespaceClass = $this->namespace . '\\' . ucfirst($this->controller);
+
+        $isCallable = false;
+        try {
+            $isCallable = is_callable(array($namespaceClass, $this->method));
+        } catch (\Exception $ex) {
+            throw new \Exception('Not found', 404);
+        }
+
+        if ($isCallable) {
+            $bindingModel = null;
+            if($this->router->getPost()) {
+                $bindingModel = BindingModel::validate($this->router->getPost(),
+                    $this->config->bindingModels[$this->namespace][$controllerPrefix][$this->method]);
+            }
+
+            $newController = new $namespaceClass();
+            call_user_func(array($newController, $this->method), $bindingModel);
+        } else {
+            throw new \Exception('Not found', 404);
+        }
+    }
+
+    public function parseCustomRoute($input, $uri)
+    {
+        $customRoutes = $this->config->routes;
+        if($customRoutes && is_array($customRoutes)) {
+            foreach($customRoutes as $customRoute => $controllerAction) {
+                $routeParts = explode('/{', $customRoute);
+                $matchedCustomRoute = array_shift($routeParts);
+                $hasParams = preg_match_all('/{(.+?)}/i', $customRoute, $result);
+                $routeParamNames = $result[1];
+
+                if(stripos($uri, $matchedCustomRoute) === 0
+                    && ($uri == $matchedCustomRoute || stripos($uri, $matchedCustomRoute . '/') === 0)) {
+
+                    if($hasParams) {
+                        $paramsUri = substr($uri, strlen($matchedCustomRoute) + 1);
+                        $paramValues = explode('/', $paramsUri);
+                        $params = array();
+                        foreach($routeParamNames as $paramName) {
+                            $params[$paramName] = array_shift($paramValues);
+                        }
+
+                        $input->setGet($params);
+                    }
+
+
+                    if($hasParams) {
+                        $matchedCustomRoute = substr($matchedCustomRoute, strlen($customRoute) + 1);
+                    } else {
+                        $matchedCustomRoute = substr($uri, strlen($customRoute) + 1);
+                    }
+
+                    $matchedCustomRouteArray = explode('/', $matchedCustomRoute);
+
+                    if($controllerAction[1]) {
+                        $this->controller = $controllerAction[1];
+                    } else {
+                        $this->controller = array_shift($matchedCustomRouteArray);
+                        if(!$this->controller) {
+                            $this->controller = $this->getDefaultController();
+                        }
+                    }
+                    if($controllerAction[2]) {
+                        $this->method = $controllerAction[2];
+                    } else {
+                        $this->method = array_shift($matchedCustomRouteArray);
+                        if(!$this->method) {
+                            $this->method = $this->getDefaultMethod();
+                        }
+                    }
+                    $input->setPost($this->router->getPost());
+                    $this->namespace = $controllerAction[0] ? $controllerAction[0] : $this->config->app['defaultControllerNamespace'];
+                    $this->loadControllerAction();
+                    return true;
+                }
+            }
+        }
     }
 }

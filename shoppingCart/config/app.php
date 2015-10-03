@@ -1,7 +1,8 @@
 <?php
 $config['default_controller'] = 'Home';
 $config['default_method'] = 'Index';
-$config['namespaces']['Controllers'] = 'C:\Users\Hadzhiew\Dropbox\IndividualProject\trunk\shoppingCart\controllers';
+$config['namespaces']['DH\ShoppingCart'] = 'C:\Users\Hadzhiew\Dropbox\IndividualProject\trunk\shoppingCart';
+$config['defaultControllerNamespace'] = 'DH\ShoppingCart\Controllers';
 
 $config['session']['autostart'] = true;
 $config['session']['type'] = 'native';
@@ -13,7 +14,7 @@ $config['session']['secure'] = false;
 $config['session']['dbConnection'] = 'default';
 $config['session']['dbTable'] = 'sessions';
 
-//$config['displayExceptions'] = true;
-$config['namespaces']['DH\ShoppingCart'] = '../../shoppingCart';
+$config['displayExceptions'] = true;
+//$config['namespaces']['DH\ShoppingCart'] = '../../shoppingCart';
 
 return $config;

@@ -50,6 +50,7 @@ final class Loader
                 $fullFilePath = str_replace('\\', DIRECTORY_SEPARATOR, $class);
                 $fullFilePath = substr_replace($fullFilePath, $path, 0, strlen($namespace)) . '.php';
                 $fullFilePath = realpath($fullFilePath);
+
                 if ($fullFilePath && is_readable($fullFilePath)) {
                     include $fullFilePath;
                 } else {

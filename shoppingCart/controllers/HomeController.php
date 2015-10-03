@@ -1,6 +1,6 @@
 <?php
 
-namespace Controllers;
+namespace DH\ShoppingCart\Controllers;
 
 class HomeController extends \DH\Mvc\BaseController
 {

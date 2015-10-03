@@ -100,7 +100,7 @@ class View
                 throw new \Exception('Invalid model.', 500);
             }
 
-            if ($ref->getShortName() != $modelType && strlen($modelType) > 0) {
+            if ($ref->getName() != $modelType && strlen($modelType) > 0) {
                 throw new \Exception('Invalid model.', 500);
             }
         }
@@ -118,7 +118,7 @@ class View
     {
         $file = fopen($filePath, "r");
         $line = fgets($file);
-        preg_match_all('/@var +(\w+) +\$/', $line, $matches);
+        preg_match_all('/@var +(.+?) +\$/', $line, $matches);
 
         return trim($matches[1][0]);
     }

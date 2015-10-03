@@ -136,6 +136,15 @@ class Validation
         return (bool) preg_match($val2, $val1);
     }
 
+    public static  function range($val, $from, $to)
+    {
+        if($val >= $from && $val <= $to){
+            return true;
+        }
+
+        return false;
+    }
+
     public static function custom($val1, $val2) {
         if ($val2 instanceof \Closure) {
             return (boolean) call_user_func($val2, $val1);

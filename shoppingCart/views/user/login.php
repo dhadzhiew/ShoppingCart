@@ -1,4 +1,4 @@
-<?php /** @var LoginUserViewModel $model */ ?>
+<?php /** @var DH\ShoppingCart\Models\ViewModels\User\LoginUser $model */ ?>
 <h1>
     Login
 </h1>
@@ -15,7 +15,7 @@
 <div class="login">
     <form method="post">
         <input type="text" name="username" placeholder="Username" /><br/>
-        <input type="password" name="pass" placeholder="Password" /><br/>
+        <input type="password" name="password" placeholder="Password" /><br/>
         <input type="submit" name="submit" value="Login" />
     </form>
 </div>

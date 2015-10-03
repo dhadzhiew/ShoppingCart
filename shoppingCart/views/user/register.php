@@ -1,4 +1,4 @@
-<?php /** @var RegisterUserViewModel $model */ ?>
+<?php /** @var DH\ShoppingCart\Models\ViewModels\User\RegisterUser $model */ ?>
 <h1>
     Register
 </h1>

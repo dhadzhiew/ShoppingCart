@@ -1,29 +1,25 @@
 <?php
-namespace Controllers;
+
+namespace DH\ShoppingCart\Controllers;
 
 use DH\Mvc\BaseController;
-use DH\Mvc\Validation;
 use DH\Mvc\View;
 use DH\ShoppingCart\Models\UserModel;
-use DH\ShoppingCart\Models\ViewModels\User\LoginUserViewModel;
-use DH\ShoppingCart\Models\ViewModels\User\ProfileUserViewModel;
-use DH\ShoppingCart\Models\ViewModels\User\RegisterUserViewModel;
+use DH\ShoppingCart\Models\ViewModels\User\ProfileUser;
+use DH\ShoppingCart\Models\ViewModels\User\RegisterUser;
 
-/**
- * [RoutePrefix("useri/")]
- */
 class UsersController extends BaseController
 {
     /**
-     * [Route("kon")]
+     * [Route("register")]
      */
     public function register()
     {
         if($this->session->userId != null) {
-            $this->redirect('/users/profile');
+            $this->redirect('/profile');
         }
 
-        $userViewModel = new RegisterUserViewModel();
+        $userViewModel = new RegisterUser();
         if ($this->input->post('submit')) {
             $username = $this->input->post('username', 'trim');
             $email = $this->input->post('email', 'trim');
@@ -48,25 +44,30 @@ class UsersController extends BaseController
     /**
      * [Route("login")]
      */
-    public function login()
+    public function login(\DH\ShoppingCart\Models\BindingModels\User\LoginUser $model = null)
     {
         if($this->session->userId != null) {
-            $this->redirect('/users/profile');
+            $this->redirect('/profile');
         }
 
-        $viewModel = new LoginUserViewModel();
-        if ($this->input->post('submit')) {
-            $username = $this->input->post('username', 'trim');
-            $password = $this->input->post('pass', 'trim');
+        $viewModel = new \DH\ShoppingCart\Models\ViewModels\User\LoginUser();
+        if ($model) {
 
-            $userModel = new UserModel();
-            $result = $userModel->login($username, $password);
+            if($model->modelState) {
+                $username = $model->username;
+                $password = $model->password;
 
-            if (!$result) {
-                $viewModel->errors[] = 'Invalid password.';
+                $userModel = new UserModel();
+                $result = $userModel->login($username, $password);
+
+                if (!$result) {
+                    $viewModel->errors[] = 'Invalid password.';
+                } else {
+                    $this->session->userId = $result['id'];
+                    $this->redirect('/profile');
+                }
             } else {
-                $this->session->userId = $result['id'];
-                $this->redirect('/users/profile');
+                $viewModel->errors = $model->errors;
             }
 
         }
@@ -79,15 +80,18 @@ class UsersController extends BaseController
         $view->display('layouts.default', $viewModel);
     }
 
+    /**
+     * [Route("profile")]
+     */
     public function profile()
     {
         if($this->session->userId == null) {
-            $this->redirect('/users/login');
+            $this->redirect('/login');
         }
 
         $userModel = new UserModel();
         $userInfo = $userModel->getUserInfo($this->session->userId);
-        $viewModel = new ProfileUserViewModel();
+        $viewModel = new ProfileUser();
         $viewModel->username = $userInfo['username'];
 
         $view = View::getInstance();
@@ -97,10 +101,12 @@ class UsersController extends BaseController
         $view->appendToLayout('footer', 'footer');
         $view->display('layouts.default', $viewModel);
     }
-
+    /**
+     * [Route("logout")]
+     */
     public function logout()
     {
         $this->session->destroySession();
-        $this->redirect('/users/login');
+        $this->redirect('/login');
     }
 }
