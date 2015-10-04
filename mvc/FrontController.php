@@ -117,7 +117,7 @@ class FrontController
             $bindingModel = null;
             if($this->router->getPost()) {
                 $bindingModel = BindingModel::validate($this->router->getPost(),
-                    $this->config->bindingModels[$this->namespace][$controllerPrefix][$this->method]);
+                    $this->config->bindingModels[$this->namespace][$controllerPrefix][strtolower($this->method)]);
             }
 
             $newController = new $namespaceClass();
@@ -147,8 +147,6 @@ class FrontController
                         foreach($routeParamNames as $paramName) {
                             $params[$paramName] = array_shift($paramValues);
                         }
-
-                        $input->setGet($params);
                     }
 
 
@@ -175,6 +173,12 @@ class FrontController
                         if(!$this->method) {
                             $this->method = $this->getDefaultMethod();
                         }
+                    }
+
+                    if($hasParams){
+                        $input->setGet(array_merge($params, $matchedCustomRouteArray));
+                    } else {
+                        $input->setGet($matchedCustomRouteArray);
                     }
                     $input->setPost($this->router->getPost());
                     $this->namespace = $controllerAction[0] ? $controllerAction[0] : $this->config->app['defaultControllerNamespace'];

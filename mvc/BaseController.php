@@ -34,6 +34,7 @@ class BaseController
         $this->input = \DH\Mvc\InputData::getInstance();
         $this->session = $this->app->getSession();
         View::logged((bool)$this->session->userId);
+        View::role($this->session->user['role']);
     }
 
     public function jsonResponse()
@@ -42,5 +43,21 @@ class BaseController
 
     public function redirect($url) {
         header('Location: '  . $url);
+    }
+
+    public function isAdmin()
+    {
+        if($this->session->user['role'] == 3) {
+            return true;
+        }
+        return false;
+    }
+
+    public function isEditor()
+    {
+        if($this->session->user['role'] == 2) {
+            return true;
+        }
+        return false;
     }
 }

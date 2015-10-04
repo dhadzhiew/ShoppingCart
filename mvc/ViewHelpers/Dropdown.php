@@ -13,13 +13,21 @@ class Dropdown implements IView
     public function __construct($name, $options = [])
     {
         $this->name = $name;
-        $this->options = $options;
-        array('value', 'text');
+        $this->options = array_map(function($ar) {
+            $res = [];
+            foreach($ar as $row) {
+                $res[] = $row;
+            }
+
+            return $res;
+        }, $options);
     }
 
     public function setSelectedOption($value)
     {
         $this->selectedOption = $value;
+
+        return $this;
     }
 
     public function __get($name)
@@ -47,12 +55,12 @@ class Dropdown implements IView
         $output = '<' . self::TAG_NAME . ' ' . $this->getAttributesAsString() . '>';
         foreach ($this->options as $option) {
 
-            $output .= PHP_EOL . '    <option value="'.$option['value'].'" ';
-            if($this->selectedOption == $option['value']) {
+            $output .= PHP_EOL . '    <option value="'.$option[0].'" ';
+            if($this->selectedOption == $option[0]) {
                 $output .= 'selected ';
             }
 
-            $output .= '>' . $option['text'] . '</option>';
+            $output .= '>' . $option[1] . '</option>';
         }
 
         $output .= PHP_EOL . '</' . self::TAG_NAME . '>';

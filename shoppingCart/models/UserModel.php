@@ -41,13 +41,15 @@ class UserModel extends SimpleDB
                 }
             }
 
+            $initialMoney = 5000;
             if(!count($errors)) {
-                $this->prepare('INSERT INTO users(username, email, password) VALUES (?, ?, ?)')
+                $this->prepare('INSERT INTO users(username, email, password,  money) VALUES (?, ?, ?, ?)')
                     ->execute(
                         array(
                             $username,
                             $email,
-                            password_hash($password, PASSWORD_DEFAULT)
+                            password_hash($password, PASSWORD_DEFAULT),
+                            $initialMoney
                         )
                     );
 
@@ -62,13 +64,13 @@ class UserModel extends SimpleDB
 
     public function login($username, $password)
     {
-        $user = $this->prepare('SELECT id,password FROM users WHERE username = ?')
+        $user = $this->prepare('SELECT * FROM users WHERE username = ?')
                     ->execute(array($username))
                     ->fetchRowAssoc();
+
         if($user && password_verify($password, $user['password'])) {
-            return array(
-                'id' => $user['id']
-            );
+            unset($user['password']);
+            return $user;
         }
 
         return false;
@@ -76,7 +78,7 @@ class UserModel extends SimpleDB
 
     public function getUserInfo($id)
     {
-        return $this->prepare('SELECT username, email FROM users WHERE id = ?')
+        return $this->prepare('SELECT u.id, u.username, u.email, u.money, r.name as role FROM users u INNER JOIN roles r ON u.role = r.id WHERE u.id = ?')
             ->execute(array($id))
             ->fetchRowAssoc();
     }

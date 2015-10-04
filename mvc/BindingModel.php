@@ -29,7 +29,7 @@ class BindingModel
             if($property == 'modelState' || $property == 'errors') {
                 continue;
             }
-
+            $bindingModel->$property = $data[$property];
             foreach ($rules as $rule) {
                 if (!is_array($rule)) {
                     if (!\DH\Mvc\Validation::$rule($data[$property])) {
@@ -56,9 +56,9 @@ class BindingModel
                     }
                 }
             }
-            if($bindingModel->modelState) {
-                $bindingModel->$property = $data[$property];
-            }
+//            if($bindingModel->modelState) {
+//
+//            }
         }
 
         return $bindingModel;

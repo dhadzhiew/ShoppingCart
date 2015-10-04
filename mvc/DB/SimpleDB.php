@@ -23,6 +23,11 @@ class SimpleDB
         }
     }
 
+    public function getDB()
+    {
+        return $this->db;
+    }
+
     public function prepare($sql, $params = array(), $pdoOptions = array())
     {
         $this->stmt = $this->db->prepare($sql, $pdoOptions);

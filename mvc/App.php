@@ -124,7 +124,7 @@ class App
             throw new \Exception('No connection identifier provided.', 500);
         }
         if ($this->_dbConnections[$connection]) {
-            return $this->_dbConnections;
+            return $this->_dbConnections[$connection];
         }
 
         $databaseConfig = $this->getConfig()->database;

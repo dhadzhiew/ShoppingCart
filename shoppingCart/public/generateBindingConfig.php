@@ -68,7 +68,7 @@ function generateBindingRules($controllerStartPath, $configFilePath)
                             $class = $param->getClass();
                             if($class) {
                                 $tempBuffer = $configVar . '["'.$namespace.'"]["'.$controllerName.'"]';
-                                $tempBuffer .= '["'.$method->getName().'"]["'.$class->getName().'"] = [';
+                                $tempBuffer .= '["'.strtolower($method->getName()).'"]["'.$class->getName().'"] = [';
                                 foreach($class->getProperties() as $prop) {
                                     $parsedAttributes = parseAttribute($prop->getDocComment());
                                     $hasAttributes = true;

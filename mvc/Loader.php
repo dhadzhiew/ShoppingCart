@@ -49,10 +49,10 @@ final class Loader
             if (strpos($class, $namespace) === 0) {
                 $fullFilePath = str_replace('\\', DIRECTORY_SEPARATOR, $class);
                 $fullFilePath = substr_replace($fullFilePath, $path, 0, strlen($namespace)) . '.php';
-                $fullFilePath = realpath($fullFilePath);
+                $realpath = realpath($fullFilePath);
 
-                if ($fullFilePath && is_readable($fullFilePath)) {
-                    include $fullFilePath;
+                if ($realpath && is_readable($realpath)) {
+                    include $realpath;
                 } else {
                     throw new \Exception('File cannot be included: ' . $fullFilePath);
                 }

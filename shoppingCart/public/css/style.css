@@ -61,7 +61,7 @@ h1 {
     text-align: center;
     color: #a85e4b;
 }
-input[type='submit'],input[type='text'],input[type='password'] {
+input[type='submit'],input[type='text'],input[type='password'],input[type='number'] {
     padding: 5px;
     background: #fff;
     border: 1px solid #ccc;
@@ -111,4 +111,54 @@ input[type='submit']:hover {
     -webkit-border-radius: 3px;
     -moz-border-radius: 3px;
     border-radius: 3px;
+}
+.leftSideBar {
+    width: 200px;
+    height: 500px;
+}
+.categories .main {
+    flex-grow: 1;
+    padding: 5px 20px;
+}
+.categories {
+    display: flex;
+    margin-top: 30px;
+}
+.categories ul {
+    list-style:none;
+}
+.categories ul li a {
+    text-decoration: none;
+    color: #fff;
+    display: block;
+    padding: 5px 5px 5px 15px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    border-radius: 3px;
+    margin: 3px 0;
+    background: #c56e58;
+    opacity: 0.9;
+}
+.categories ul li a:hover {
+    opacity: 1;
+}
+table {
+    border: 1px solid #000;
+    border-collapse: collapse;
+    width: 100%;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+table td {
+     border: 1px solid #000;
+    padding: 5px;
+ }
+.addToCartForm {
+    padding:0;
+    width: 100px;
+}
+.addToCartColumn {
+    width: 100px;
 }

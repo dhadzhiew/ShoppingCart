@@ -1,2 +1,2 @@
 <?php /** @var DH\ShoppingCart\Models\ViewModels\HomeViewModel $model */ ?>
-<?=  $this->model->getBody(); ?>
+<h1>Home page</h1>

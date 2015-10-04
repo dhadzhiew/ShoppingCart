@@ -64,6 +64,7 @@ class UsersController extends BaseController
                     $viewModel->errors[] = 'Invalid password.';
                 } else {
                     $this->session->userId = $result['id'];
+                    $this->session->user = $result;
                     $this->redirect('/profile');
                 }
             } else {
@@ -89,10 +90,14 @@ class UsersController extends BaseController
             $this->redirect('/login');
         }
 
+
         $userModel = new UserModel();
         $userInfo = $userModel->getUserInfo($this->session->userId);
         $viewModel = new ProfileUser();
         $viewModel->username = $userInfo['username'];
+        $viewModel->money = $userInfo['money'];
+        $viewModel->email = $userInfo['email'];
+        $viewModel->role = $userInfo['role'];
 
         $view = View::getInstance();
         View::title('Profile');
