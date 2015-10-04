@@ -14,7 +14,7 @@ $config['session']['secure'] = false;
 $config['session']['dbConnection'] = 'default';
 $config['session']['dbTable'] = 'sessions';
 
-$config['displayExceptions'] = true;
+//$config['displayExceptions'] = true;
 //$config['namespaces']['DH\ShoppingCart'] = '../../shoppingCart';
 
 return $config;

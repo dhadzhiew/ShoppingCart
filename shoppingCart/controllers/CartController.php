@@ -18,13 +18,17 @@ class CartController extends BaseController
             $this->redirect('/');
             exit;
         }
-
+        $errors = [];
         if ($model != null && $model->modelState == true) {
             $cartModel = new CartModel();
-            $cartModel->addProduct($model, $this->session->userId);
+            $errors = $cartModel->addProduct($model, $this->session->userId);
         }
 
-        $this->redirect('/cart/view');
+        if(count($errors) == 0){
+            $this->redirect('/cart/view');
+        }else {
+            $this->redirect($_SERVER[HTTP_REFERER]);
+        }
     }
 
     public function view()

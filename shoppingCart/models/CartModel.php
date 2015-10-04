@@ -24,17 +24,25 @@ class CartModel extends SimpleDB
     {
         $userProductId = Common::normalize($model->userProductId, 'int');
         $quantity = Common::normalize($model->quantity, 'int');
+        $errors = [];
+        if($model->quantity <= 0){
+            $errors[] = 'Invalid quantity.';
+        }
 
-        $addStmt = $this->prepare('INSERT INTO `shopping_cart`(`shopper_id`, `user_product_id`, `quantity`) VALUES (?, ?, ?)
-        ON DUPLICATE KEY UPDATE quantity = quantity + ?');
-        $addStmt->execute(
-            array(
-                $shopperId,
-                $userProductId,
-                $quantity,
-                $quantity
-            )
-        );
+        if(!count($errors)) {
+            $addStmt = $this->prepare('INSERT INTO `shopping_cart`(`shopper_id`, `user_product_id`, `quantity`) VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE quantity = quantity + ?');
+                $addStmt->execute(
+                    array(
+                        $shopperId,
+                        $userProductId,
+                        $quantity,
+                        $quantity
+                    )
+                );
+        }
+
+        return $errors;
     }
 
     public function getProducts($userId)

@@ -91,7 +91,7 @@ class UsersController extends BaseController
         if ($this->session->userId == null) {
             $this->redirect('/login');
         }
-        
+
         $userModel = new UserModel();
         $userInfo = $userModel->getUserInfo($this->session->userId);
         $viewModel = new ProfileUser();
@@ -108,6 +108,9 @@ class UsersController extends BaseController
         $view->display('layouts.default', $viewModel);
     }
 
+    /**
+     * [Route("products")]
+     */
     public function myProducts()
     {
         if(!$this->session->userId){

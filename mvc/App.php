@@ -6,40 +6,40 @@ include_once 'Loader.php';
 
 class App
 {
-    private static $_instance;
-    private $_config = null;
-    private $_frontController;
+    private static $instance;
+    private $config = null;
+    private $frontController;
     private $router = null;
-    private $_dbConnections;
-    private $_session;
+    private $dbConnections;
+    private $session;
 
     private function __construct()
     {
         set_exception_handler(array($this, '_exceptionHandler'));
         \DH\Mvc\Loader::registerNamespace('DH\Mvc', dirname(__FILE__) . DIRECTORY_SEPARATOR);
         \DH\Mvc\Loader::registerAutoLoad();
-        $this->_config = \DH\Mvc\Config::getInstance();
+        $this->config = \DH\Mvc\Config::getInstance();
     }
 
     public function run()
     {
-        if ($this->_config->getConfigFolder() == null) {
-            $this->_config->setConfigFolder("../config");
+        if ($this->config->getConfigFolder() == null) {
+            $this->config->setConfigFolder("../config");
         }
 
-        $this->_frontController = \DH\Mvc\FrontController::getInstance();
+        $this->frontController = \DH\Mvc\FrontController::getInstance();
         if ($this->router instanceof \DH\Mvc\Routers\IRouter) {
-            $this->_frontController->setRouter($this->router);
+            $this->frontController->setRouter($this->router);
         } elseif ($this->router == 'JsonRPCRouter') {
             // TODO fix when RPC is done
-            $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
+            $this->frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
         } elseif ($this->router == 'CLIRouter') {
-            $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
+            $this->frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
         } else {
-            $this->_frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
+            $this->frontController->setRouter(new \DH\Mvc\Routers\DefaultRouter());
         }
 
-        $_sessionConfig = $this->_config->app['session'];
+        $_sessionConfig = $this->config->app['session'];
         if ($_sessionConfig['autostart']) {
             if ($_sessionConfig['type'] == 'native') {
                 $_s = new \DH\Mvc\Session\NativeSession(
@@ -65,7 +65,7 @@ class App
             $this->setSession($_s);
         }
 
-        $this->_frontController->dispatch();
+        $this->frontController->dispatch();
     }
 
     /**
@@ -73,21 +73,21 @@ class App
      */
     public static function getInstance()
     {
-        if (self::$_instance == null) {
-            self::$_instance = new \DH\Mvc\App();
+        if (self::$instance == null) {
+            self::$instance = new \DH\Mvc\App();
         }
 
-        return self::$_instance;
+        return self::$instance;
     }
 
     public function setConfigFolder($path)
     {
-        $this->_config->setConfigFolder($path);
+        $this->config->setConfigFolder($path);
     }
 
     public function getConfigFolder()
     {
-        return $this->_config->getConfigFolder();
+        return $this->config->getConfigFolder();
     }
 
     /**
@@ -95,7 +95,7 @@ class App
      */
     public function getConfig()
     {
-        return $this->_config;
+        return $this->config;
     }
 
     public function getRouter()
@@ -110,12 +110,12 @@ class App
 
     public function setSession(\DH\Mvc\Session\ISession $session)
     {
-        $this->_session = $session;
+        $this->session = $session;
     }
 
     public function getSession()
     {
-        return $this->_session;
+        return $this->session;
     }
 
     public function getDBConnection($connection = 'default')
@@ -123,8 +123,8 @@ class App
         if (!$connection) {
             throw new \Exception('No connection identifier provided.', 500);
         }
-        if ($this->_dbConnections[$connection]) {
-            return $this->_dbConnections[$connection];
+        if ($this->dbConnections[$connection]) {
+            return $this->dbConnections[$connection];
         }
 
         $databaseConfig = $this->getConfig()->database;
@@ -137,7 +137,7 @@ class App
             $databaseConfig[$connection]['username'],
             $databaseConfig[$connection]['password'],
             $databaseConfig[$connection]['pdo_options']);
-        $this->_dbConnections[$connection] = $dbh;
+        $this->dbConnections[$connection] = $dbh;
 
         return $dbh;
     }
@@ -160,7 +160,7 @@ class App
 
     public function _exceptionHandler(\Exception $ex)
     {
-        if ($this->_config && $this->_config->app['displayExceptions'] === true) {
+        if ($this->config && $this->config->app['displayExceptions'] === true) {
             echo '<pre>' . print_r($ex, true) . '</pre>';
         } else {
             $this->displayError($ex->getCode());
@@ -169,8 +169,8 @@ class App
 
     public function __destruct()
     {
-        if ($this->_session != null) {
-            $this->_session->saveSession();
+        if ($this->session != null) {
+            $this->session->saveSession();
         }
     }
 

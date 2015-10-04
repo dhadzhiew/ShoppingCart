@@ -75,11 +75,32 @@ class UserModel extends SimpleDB
 
         return false;
     }
-
+    
     public function getUserInfo($id)
     {
-        return $this->prepare('SELECT u.id, u.username, u.email, u.money, r.name as role FROM users u INNER JOIN roles r ON u.role = r.id WHERE u.id = ?')
+        return $this->prepare('SELECT u.id, u.username, u.email, u.money, u.ip, u.last_login_date as lastLoginDate, u.registration_date as registrationDate, r.name as role FROM users u INNER JOIN roles r ON u.role = r.id WHERE u.id = ?')
             ->execute(array($id))
             ->fetchRowAssoc();
+    }
+
+    public function banUser($id, $myId)
+    {
+        $existingUser = $this->getUserInfo($id);
+        if(!$existingUser){
+            throw new \Exception('No such user');
+        }
+
+        if($existingUser['id'] == $myId){
+            throw new \Exception('You can`t ban yourself');
+        }
+
+        $result = $this->prepare("INSERT INTO users_bans SET user_id = ?, ip= ? ON DUPLICATE KEY UPDATE user_id = ?, ip = ?");
+        $result->execute(
+            [
+                $existingUser["id"],
+                $existingUser["ip"],
+                $existingUser["id"],
+                $existingUser["ip"]
+            ]);
     }
 }
