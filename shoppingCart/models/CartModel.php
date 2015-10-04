@@ -91,7 +91,7 @@ class CartModel extends SimpleDB
                 $this->prepare('INSERT INTO users_products(user_id, product_id, sell_price, quantity, status)
                 VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE
                 quantity = quantity + ?')
-                    ->execute(array($user['id'], $item['product_id'], $item['sell_price'], 1, 1, $item['quantity']));
+                    ->execute(array($user['id'], $item['product_id'], $item['sell_price'], 1, 2, $item['quantity']));
                 $this->prepare('DELETE FROM shopping_cart WHERE user_product_id = ? AND shopper_id = ?')
                     ->execute(array($item['user_product_id'], $user['id']));
                 $this->getDB()->commit();

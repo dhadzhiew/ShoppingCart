@@ -4,7 +4,9 @@ namespace DH\ShoppingCart\Controllers;
 
 use DH\Mvc\BaseController;
 use DH\Mvc\View;
+use DH\ShoppingCart\models\ProductsModel;
 use DH\ShoppingCart\Models\UserModel;
+use DH\ShoppingCart\Models\ViewModels\User\MyProducts;
 use DH\ShoppingCart\Models\ViewModels\User\ProfileUser;
 use DH\ShoppingCart\Models\ViewModels\User\RegisterUser;
 
@@ -89,8 +91,7 @@ class UsersController extends BaseController
         if ($this->session->userId == null) {
             $this->redirect('/login');
         }
-
-
+        
         $userModel = new UserModel();
         $userInfo = $userModel->getUserInfo($this->session->userId);
         $viewModel = new ProfileUser();
@@ -105,6 +106,27 @@ class UsersController extends BaseController
         $view->appendToLayout('body', 'user.profile');
         $view->appendToLayout('footer', 'footer');
         $view->display('layouts.default', $viewModel);
+    }
+
+    public function myProducts()
+    {
+        if(!$this->session->userId){
+            $this->redirect('/');
+            exit;
+        }
+
+        $productsModel = new ProductsModel();
+        $myProducts = $productsModel->getUserProducts($this->session->userId);
+
+        $productView = new MyProducts();
+        $productView->products = $myProducts;
+
+        $view = View::getInstance();
+        View::title('My Products');
+        $view->appendToLayout('header', 'header');
+        $view->appendToLayout('body', 'user.myProducts');
+        $view->appendToLayout('footer', 'footer');
+        $view->display('layouts.default', $productView);
     }
 
     /**

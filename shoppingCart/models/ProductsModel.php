@@ -59,6 +59,32 @@ class ProductsModel extends SimpleDB
         return $allProducts->execute(array($userId))->fetchAllAssoc();
     }
 
+    public function getUserProducts($userId)
+    {
+        $allProducts = $this->prepare("
+            SELECT
+              up.id, `quantity`,`sell_price`, p.name, u.username, status, u.username as seller, up.product_id
+            FROM
+              `users_products` up
+            INNER JOIN users u ON u.id = up.user_id
+            INNER JOIN products p ON p.id = up.product_id
+            WHERE u.id = ?");
+
+        return $allProducts->execute(array($userId))->fetchAllAssoc();
+    }
+
+    public function unpublishUserProduct($productId, $userId)
+    {
+        $this->prepare('UPDATE users_products SET status = 2 WHERE user_id = ? AND product_id = ?')
+            ->execute(array($userId, $productId));
+    }
+
+    public function publishUserProduct($productId, $userId)
+    {
+        $this->prepare('UPDATE users_products SET status = 1 WHERE user_id = ? AND product_id = ?')
+            ->execute(array($userId, $productId));
+    }
+
     public function getAllProducts()
     {
         $allProducts = $this->prepare("SELECT p.id, p.name, c.name as category FROM `products` p INNER JOIN categories c ON p.category_id = c.id ");
